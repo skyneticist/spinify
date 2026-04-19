@@ -2,7 +2,7 @@
 name = "spinify"
 version = "0.1.0"
 edition = "2021"
-authors = ["Your Name <your.email@example.com>"]
+authors = ["hunterhartline@gmail.com"]
 description = "A Rust library providing utilities for spawning asynchronous tasks with progress spinners using the indicatif crate."
 license = "MIT"
 repository = "https://github.com/yourusername/spinify"
