@@ -5,7 +5,6 @@ A Rust library providing utilities for spawning asynchronous tasks with progress
 ## Demo
 
 ![Demo](demo.gif)
-
 *Run `cargo run` to see the spinners in action!*
 
 ## Description
