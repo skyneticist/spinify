@@ -1,46 +1,112 @@
-use indicatif::MultiProgress;
-use spinify::spawn_spinner_task;
+use indicatif::{MultiProgress, ProgressStyle};
+use spinify::{spawn_spinner_task, spawn_spinner_task_with_style};
 use tokio::time::{sleep, Duration};
 
 // Dummy stand-ins for your real API call functions:
 async fn fetch_users() -> usize {
-    sleep(Duration::from_secs(2)).await;
-    1515
+    // Simulate database query with some processing
+    sleep(Duration::from_millis(500)).await;
+    let mut count = 0;
+    for i in 0..1500 {
+        count += i % 10; // Simulate some computation
+        sleep(Duration::from_micros(100)).await; // Throttle to make it visible
+    }
+    count
 }
+
 async fn fetch_orders() -> usize {
-    sleep(Duration::from_secs(3)).await;
-    42
+    // Simulate API call with data aggregation
+    sleep(Duration::from_millis(800)).await;
+    let mut total = 0;
+    for order in 0..42 {
+        total += order * 2; // Simulate order value calculation
+        sleep(Duration::from_millis(50)).await;
+    }
+    total
 }
+
 async fn fetch_inventory() -> usize {
-    sleep(Duration::from_secs(1)).await;
-    100
+    // Simulate inventory check with random fluctuations
+    sleep(Duration::from_millis(300)).await;
+    let base = 100;
+    let mut inventory = base;
+    for _ in 0..10 {
+        inventory += (inventory as f64 * 0.1) as usize; // Simulate stock adjustments
+        sleep(Duration::from_millis(70)).await;
+    }
+    inventory
 }
 
 async fn fetch_admin() -> Vec<String> {
-    sleep(Duration::from_secs(10)).await;
-    vec!["alice".into(), "bob".into()]
+    // Simulate admin user lookup with multiple steps
+    sleep(Duration::from_secs(1)).await;
+    let mut admins = Vec::new();
+    let names = ["alice", "bob", "charlie", "diana"];
+    for name in names {
+        sleep(Duration::from_millis(500)).await; // Simulate permission check
+        admins.push(name.to_string());
+    }
+    admins
 }
 
 async fn count_users() -> usize {
-    sleep(Duration::from_secs(1)).await;
-    1515
+    // Simulate counting active users with filtering
+    sleep(Duration::from_millis(400)).await;
+    let mut active_count = 0;
+    for user_id in 0..1515 {
+        if user_id % 3 == 0 {
+            // Simulate active user filter
+            active_count += 1;
+        }
+        sleep(Duration::from_micros(50)).await;
+    }
+    active_count
 }
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let multi = MultiProgress::new();
 
-    // Spawn concurrent spinners:
-    let users_handle: tokio::task::JoinHandle<usize> =
-        spawn_spinner_task(&multi, "Fetch Users", fetch_users());
-    let orders_handle: tokio::task::JoinHandle<usize> =
-        spawn_spinner_task(&multi, "Fetch Orders", fetch_orders());
-    let inventory_handle: tokio::task::JoinHandle<usize> =
-        spawn_spinner_task(&multi, "Fetch Inventory", fetch_inventory());
-    let admin_handle: tokio::task::JoinHandle<Vec<String>> =
-        spawn_spinner_task(&multi, "Fetch Admin", fetch_admin());
-    let count_handle: tokio::task::JoinHandle<usize> =
-        spawn_spinner_task(&multi, "Count Users", count_users());
+    println!("\n\n🚀 Demonstrating spinify spinners...\n");
+
+    // Basic spinner with default style
+    let users_handle = spawn_spinner_task(&multi, "📊 Fetch Users", fetch_users());
+
+    // Custom spinner with dots
+    let orders_style = ProgressStyle::default_spinner()
+        .template("{spinner} {msg}")
+        .unwrap()
+        .tick_chars("⠁⠂⠄⠂");
+    let orders_handle =
+        spawn_spinner_task_with_style(&multi, "🛒 Fetch Orders", orders_style, fetch_orders());
+
+    // Custom spinner with arrows
+    let inventory_style = ProgressStyle::default_spinner()
+        .template("{spinner:.blue} {msg}")
+        .unwrap()
+        .tick_chars("←↖↑↗→↘↓↙");
+    let inventory_handle = spawn_spinner_task_with_style(
+        &multi,
+        "📦 Fetch Inventory",
+        inventory_style,
+        fetch_inventory(),
+    );
+
+    // Custom style spinner with Braille
+    let custom_style = ProgressStyle::default_spinner()
+        .template("{spinner:.green} {msg:.cyan.bold}")
+        .unwrap()
+        .tick_chars("⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏");
+    let admin_handle =
+        spawn_spinner_task_with_style(&multi, "👑 Fetch Admin", custom_style, fetch_admin());
+
+    // Custom spinner with classic ASCII
+    let count_style = ProgressStyle::default_spinner()
+        .template("{spinner:.yellow} {msg:.magenta}")
+        .unwrap()
+        .tick_chars("|/-\\");
+    let count_handle =
+        spawn_spinner_task_with_style(&multi, "🔢 Count Users", count_style, count_users());
 
     // Await all of them and propagate any task failures.
     let users = users_handle.await?;
@@ -52,9 +118,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Clear finished progress bars from the terminal.
     // let _ = multi.clear();
 
-    println!(
-        "All tasks completed:\n users={},\n orders={},\n inventory={},\n admin={:?},\n count={}",
-        users, orders, inventory, admin, count
-    );
+    println!("\n\nAll tasks completed:");
+    println!("- Users: {}", users);
+    println!("- Orders: {}", orders);
+    println!("- Inventory: {}", inventory);
+    println!("- Admin: {:?}", admin);
+    println!("- Count: {}", count);
     Ok(())
 }

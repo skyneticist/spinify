@@ -2,6 +2,18 @@
 
 A Rust library providing utilities for spawning asynchronous tasks with progress spinners using the `indicatif` crate.
 
+## Demo
+
+![Demo](demo.gif)
+
+*Run `cargo run` to see the spinners in action!*
+
+To create the demo GIF:
+1. Install [asciinema](https://asciinema.org/) or [terminalizer](https://github.com/faressoft/terminalizer)
+2. Run `asciinema rec demo.cast` (or equivalent)
+3. Execute `cargo run`
+4. Stop recording and convert to GIF: `asciinema gif demo.cast demo.gif`
+
 ## Description
 
 `spinify` simplifies running concurrent async tasks with visual progress indicators. It integrates seamlessly with `tokio` and `indicatif` to display spinners for long-running operations like API calls or data processing.

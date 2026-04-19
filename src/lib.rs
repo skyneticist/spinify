@@ -32,6 +32,7 @@ use tokio::task::JoinHandle;
 ///     });
 ///
 ///     assert_eq!(handle.await.unwrap(), "done");
+///     // Spinner will show: ✅ Loading - Done
 /// }
 /// ```
 pub fn spawn_spinner_task<Fut, T>(
@@ -75,7 +76,7 @@ where
 
     tokio::spawn(async move {
         let result: T = fut.await;
-        pb.finish_with_message(format!("{} – Done", prefix));
+        pb.finish_with_message(format!("✅ {} - Done", prefix));
         result
     })
 }
